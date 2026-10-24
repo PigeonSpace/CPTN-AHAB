@@ -5,6 +5,8 @@ import csv
 import adafruit_gps
 import adafruit_mcp9600
 import serial
+import json
+import os
 
 #gps build function
 
@@ -284,6 +286,29 @@ while True:
                     writer.writerow([round(current, 1), timestamp, sat_num, fix_quality, latitude, longitude, altitude, speed, track_angle, horizontal_dilution, height_geoid, exterior_temp, interior_temp, battery_temp])
             except OSError as error:
                 print(f"Log row write failed: {error}")
+
+            status = {"uptime_s": round(current, 1),
+                      "timestamp": timestamp,
+                      "fix_quality": fix_quality,
+                      "latitude": latitude,
+                      "longitude": longitude,
+                      "altitude_m": altitude,
+                      "speed":speed,
+                      "track_angle":track_angle,
+                      "horizontal_dilution":horizontal_dilution,
+                      "height_geoid":height_geoid,
+                      "sat_num": sat_num,
+                      "exterior_temp":exterior_temp,
+                      "interior_temp": interior_temp,
+                      "battery_temp": battery_temp,
+            }
+            try:
+                with open("/dev/shm/latest.json.tmp", "w") as f:
+                    json.dump(status, f)
+                os.replace("/dev/shm/latest.json.tmp", "/dev/shm/latest.json")
+            except OSError as error:
+                print(f"Status file write failed: {error}")
+
             print(timestamp)
             print(f"Number of Satellites: {sat_num}")
             print(f"Fix quality: {fix_quality}")
