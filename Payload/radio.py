@@ -1,12 +1,9 @@
-import sys
-import select
 import board
 import busio
 import digitalio
 import adafruit_rfm9x
 import time
 import json
-import os
 
 CALLSIGN = "KM7HZC"
 
@@ -43,7 +40,7 @@ def connect_radio():
         #turn radio on and listen for incoming packets
         rfm9x.listen()
         print("Radio Initialized and listening")
-        return radio
+        return rfm9x
     except RADIO_ERRORS as error:
         print(f"Radio initialization failed: {error}")
         return None
@@ -55,7 +52,7 @@ def update_status():
     except(OSError, ValueError) as error:
         print(f"Unable to read status file: {error}")
         return None
-    uptime = status.get("uptime_s" if isinstance(status, dict) else None)
+    uptime = status.get("uptime_s") if isinstance(status, dict) else None
     if uptime is None or uptime > time.monotonic() + 1:
         print("Status file's uptime is not valid: Something is broken. Ignoring.")
         return None
@@ -74,12 +71,12 @@ def build_packet(seq, status, last_fix, current): # builds the packet for transm
     lat = long = alt = fix_age = None
     if last_fix is not None:
         lat, long, alt, fix_time = last_fix
-        fix_age = current - fix_time
+        fix_age = max(0, current - fix_time)
     
     data_age = None
 
     if status.get("uptime_s") is not None:
-        data_age = current - status["uptime_s"]
+        data_age = max(0, current - status["uptime_s"])
     
     fields = [
         CALLSIGN,
@@ -113,7 +110,7 @@ while True:
  
         if current >= next_beacon:
             next_beacon += BEACON_INTERVAL
-            if next_beacon <= current:           # Something is broken and the next transmission time is in the past. Do not transmit. 
+            if next_beacon <= current:           # Something is broken and the next transmission time is in the past. Resetting to now. 
                 next_beacon = current + BEACON_INTERVAL
  
             status = update_status()
