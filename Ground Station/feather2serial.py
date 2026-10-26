@@ -27,7 +27,7 @@ def write_log(text): #timestamps every line, prints to terminal, and writes to d
             f.flush()
             os.fsync(f.fileno())
     except OSError as error:
-print(f"Log write failed: {error}")
+        print(f"Log write failed: {error}")
 
 #create the log folder if it doesn't already exist
 
@@ -38,7 +38,7 @@ while True:
     log_path = os.path.join(LOG_DIR, f"groundlog{filenamecounter}.log")
     try:
         with open(log_path, "x") as f:
-            f.write(f"Log file freated at: {utc_now()}\n")
+            f.write(f"Log file created at: {utc_now()}\n")
         print(f"Log file created at: {log_path}")
         break
     except FileExistsError:
@@ -79,8 +79,8 @@ while True:
     except KeyboardInterrupt:
         if ser is not None:
             ser.close()
-            write_log("---logger stopped---")
-            break
+        write_log("---logger stopped---")
+        break
 
 
 
