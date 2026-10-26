@@ -81,7 +81,7 @@ def build_packet(seq, status, last_fix, current): # builds the packet for transm
     fields = [
         CALLSIGN,
         str(seq),
-        format_val(lat, ".5f"),   # 5 decimals gives about 1m pf accuracy
+        format_val(lat, ".5f"),   # 5 decimals gives about 1m of accuracy
         format_val(long, ".5f"),
         format_val(alt, ".0f"),
         format_val(fix_age, ".0f"),
